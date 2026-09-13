@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RA MockLab — NISM Research Analyst Practice</title>
+<style>
+*{box-sizing:border-box}body{margin:0;font-family:Inter,Arial,sans-serif;background:#f4f7fb;color:#172033}
+header{background:#102a43;color:#fff;padding:16px 24px;display:flex;justify-content:space-between;align-items:center}
+.logo{font-weight:800;font-size:20px}.tag{font-size:12px;opacity:.8}
+.container{max-width:1180px;margin:24px auto;padding:0 16px}.card{background:#fff;border-radius:14px;padding:22px;box-shadow:0 4px 18px #00000010;margin-bottom:18px}
+h1,h2{margin-top:0}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+button{border:0;border-radius:9px;padding:12px 17px;font-weight:700;cursor:pointer;background:#1769e0;color:white}
+button.secondary{background:#e8eef7;color:#18324a}.danger{background:#c0392b}
+.mode{padding:16px;border:1px solid #dce5ef;border-radius:12px}.mode h3{margin:0 0 6px}
+.hidden{display:none}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}
+.timer{font-size:22px;font-weight:800;color:#c0392b}.progress{height:8px;background:#e7edf5;border-radius:99px;overflow:hidden}.bar{height:100%;background:#1769e0;width:0}
+.options label{display:block;border:1px solid #dce5ef;padding:14px;margin:10px 0;border-radius:10px;cursor:pointer}.options label:hover{background:#f5f9ff}
+.options input{margin-right:10px}.navgrid{display:grid;grid-template-columns:repeat(10,1fr);gap:6px;margin-top:12px}.qnum{padding:8px 0;background:#edf2f7;color:#334e68;border-radius:6px}.qnum.active{background:#1769e0;color:#fff}.qnum.answered{background:#6c8}.qnum.review{outline:3px solid #f2c94c}
+.result-score{font-size:42px;font-weight:900}.pass{color:#16803c}.fail{color:#b42318}
+.review-item{border-left:5px solid #c0392b;padding:14px;background:#fff7f6;margin:12px 0;border-radius:8px}.correct{border-left-color:#16803c;background:#f4fff8}
+.small{font-size:13px;color:#627d98}.pill{display:inline-block;padding:5px 9px;border-radius:99px;background:#edf2f7;margin:3px;font-size:12px}
+
+.payment-box{border:1px solid #dce5ef;border-radius:12px;padding:18px;margin-bottom:18px;background:#f8fbff}
+.payment-amount{font-size:28px;font-weight:900;color:#102a43}
+.upi-id{font-family:monospace;background:#edf2f7;padding:8px 10px;border-radius:7px;display:inline-block;user-select:all}
+.pay-btn{display:inline-block;text-decoration:none;border-radius:9px;padding:12px 17px;font-weight:700;background:#1769e0;color:#fff;margin-top:10px}
+.payment-note{font-size:12px;color:#627d98;margin-top:8px}
+</style>
+</head>
+<body>
+<header><div><div class="logo">RA MockLab</div><div class="tag">NISM-Series-XV style practice</div></div><div id="headerStat"></div></header>
+
+<div class="container">
+<section id="home" class="card">
+<h1>Research Analyst Mock Test</h1>
+<p>Unlimited practice with randomized original questions aligned to the current NISM-Series-XV structure.</p>
+
+<div class="payment-box">
+  <h2>Exam Access</h2>
+  <p>Pay the fixed exam fee before starting the mock test.</p>
+  <div class="payment-amount">₹50</div>
+  <p><b>UPI ID:</b> <span class="upi-id">singhdhru3074@okhdfcbank</span></p>
+  <p><b>UPI / Mobile:</b> 7021339211</p>
+  <a class="pay-btn" href="upi://pay?pa=singhdhru3074@okhdfcbank&pn=RA%20MockLab&am=50&cu=INR">Pay ₹50 via UPI</a>
+  <div class="payment-note">UPI payment is not automatically verified by this HTML-only website.</div>
+</div>
+<div class="grid">
+<div class="mode"><h3>Full Mock</h3><p>100 marks · 2 hours · negative marking</p><button onclick="start('full')">Start Full Mock</button></div>
+<div class="mode"><h3>Quick Practice</h3><p>20 random questions · instant practice session</p><button onclick="start('quick')">Start Practice</button></div>
+<div class="mode"><h3>Chapter Practice</h3><p>Choose a chapter and practice repeatedly.</p><select id="chapter"></select><button onclick="start('chapter')">Start Chapter</button></div>
+<div class="mode"><h3>Wrong Questions</h3><p>Retry questions you got wrong in this browser.</p><button class="secondary" onclick="wrongOnly()">Retry Wrong</button></div>
+</div>
+</section>
+
+<section id="exam" class="hidden">
+<div class="card top"><div><b id="modeTitle"></b><div class="small" id="qMeta"></div></div><div class="timer" id="timer">02:00:00</div></div>
+<div class="card"><div class="progress"><div class="bar" id="bar"></div></div></div>
+<div class="card">
+<h2 id="qText"></h2><div id="caseText" class="small"></div>
+<div class="options" id="options"></div>
+<div class="top">
+<button class="secondary" onclick="prev()">Previous</button>
+<div><button class="secondary" onclick="toggleReview()">Mark for review</button> <button onclick="next()">Next</button></div>
+</div>
+</div>
+<div class="card"><b>Question Navigator</b><div id="navgrid" class="navgrid"></div></div>
+<div class="card"><button class="danger" onclick="submitExam()">Submit Test</button></div>
+</section>
+
+<section id="result" class="hidden">
+<div class="card"><h1>Test Result</h1><div class="result-score" id="score"></div><div id="status"></div><p id="stats"></p><button onclick="goHome()">Back to Dashboard</button> <button onclick="retryWrongFromResult()">Retry Wrong Questions</button></div>
+<div class="card"><h2>Answer Review</h2><div id="review"></div></div>
+</section>
+</div>
+
+<script>
+const chapters=[
+"Introduction to Research Analyst Profession","Introduction to Securities Market","Terminology in Equity and Debt Markets",
+"Fundamentals of Research","Economic Analysis","Industry Analysis","Company Analysis – Business and Governance",
+"Company Analysis – Financial Analysis","Corporate Actions","Valuation Principles","Fundamental Analysis of Commodities",
+"Fundamentals of Risk and Return","Qualities of a Good Research Report","Legal and Regulatory Environment","Technical Analysis"
+];
+
+const bank=[
+{c:4,q:"Which approach starts with the overall economy, then industry, and finally the company?",o:["Bottom-up","Top-down","Random walk","Technical-only"],a:1,e:"Top-down analysis moves from macroeconomics to industry and then company-level analysis."},
+{c:8,q:"If current assets are ₹5 lakh and current liabilities are ₹2.5 lakh, the current ratio is:",o:["0.5x","1x","2x","2.5x"],a:2,e:"Current ratio = Current Assets / Current Liabilities = 5 / 2.5 = 2x."},
+{c:10,q:"A DCF valuation primarily estimates value from:",o:["Historical book value only","Present value of expected future cash flows","Share price momentum only","Dividend history only"],a:1,e:"DCF discounts expected future cash flows back to their present value."},
+{c:8,q:"A company has revenue ₹100 crore and EBIT ₹15 crore. EBIT margin is:",o:["6.67%","10%","15%","20%"],a:2,e:"EBIT margin = EBIT / Revenue × 100 = 15/100 × 100 = 15%."},
+{c:12,q:"Which measure is commonly used to describe the variability of an investment's returns?",o:["Beta","Standard deviation","P/E","Book value"],a:1,e:"Standard deviation measures dispersion/variability of returns."},
+{c:15,q:"A price repeatedly fails to move above a particular level. That level is commonly called:",o:["Support","Resistance","Face value","Yield"],a:1,e:"A price ceiling where selling pressure repeatedly appears is resistance."},
+{c:14,q:"A Research Analyst should disclose relevant conflicts of interest primarily to:",o:["Hide them","Increase speculation","Promote transparency and manage conflicts","Avoid all research"],a:2,e:"Conflict disclosure supports transparency and helps users assess the research objectively."},
+{c:5,q:"An increase in policy rates, all else equal, is generally intended to:",o:["Increase inflation immediately","Reduce borrowing demand and inflationary pressure","Eliminate taxes","Guarantee higher equity prices"],a:1,e:"Higher rates generally make borrowing more expensive and can reduce demand and inflationary pressure."},
+{c:6,q:"In industry analysis, a high barrier to entry generally means:",o:["New competitors can enter easily","Existing firms may face less threat from new entrants","Demand is always zero","Margins must be negative"],a:1,e:"Entry barriers can protect established firms from new competition."},
+{c:7,q:"Corporate governance primarily concerns:",o:["Only share price movement","Systems by which companies are directed, controlled and overseen","Only advertising","Only tax collection"],a:1,e:"Governance covers oversight, accountability, controls and stakeholder interests."},
+{c:9,q:"A bonus issue generally involves:",o:["Issuing free additional shares to eligible existing shareholders","Mandatory cash dividend","Repayment of all debt","Selling company assets"],a:0,e:"A bonus issue capitalizes reserves and issues additional shares to existing shareholders without a cash payment."},
+{c:11,q:"For a commodity, inventory levels can influence:",o:["Only accounting standards","Supply-demand balance and prices","Only employee salaries","Only bond coupons"],a:1,e:"Inventories are part of available supply and can influence commodity price dynamics."},
+{c:13,q:"A good research report should present assumptions and risks:",o:["Clearly","Never","Only verbally","Only after the investment"],a:0,e:"Clear assumptions and risk disclosures improve transparency and usefulness."},
+{c:3,q:"A bond's coupon rate refers to:",o:["Its annual interest rate on face value","Its market price","Its maturity date","Its credit rating"],a:0,e:"The coupon rate is the stated annual interest as a percentage of face value."},
+{c:2,q:"An IPO is primarily associated with:",o:["A company's first public issue of shares","Daily secondary-market trading only","A mutual fund redemption","A bond coupon payment"],a:0,e:"IPO stands for Initial Public Offering, the first public offering of a company's shares."},
+{c:1,q:"A Research Analyst's core work includes:",o:["Preparing research and analysis according to applicable requirements","Guaranteeing returns","Manipulating prices","Avoiding disclosures"],a:0,e:"Research Analysts provide research/analysis and must follow applicable professional and regulatory requirements."},
+{c:8,q:"If a company has PAT of ₹20 crore and equity of ₹100 crore, ROE is:",o:["5%","10%","20%","50%"],a:2,e:"ROE = PAT / Equity × 100 = 20/100 × 100 = 20%."},
+{c:10,q:"If intrinsic value is estimated at ₹120 and market price is ₹90, the analyst may initially describe the stock as:",o:["Potentially undervalued","Definitely bankrupt","Always overvalued","Risk-free"],a:0,e:"Market price below estimated intrinsic value can indicate potential undervaluation, subject to assumptions and risk."},
+{c:12,q:"Beta primarily measures a stock's sensitivity to:",o:["Its accounting profit","Market/systematic movements","Its dividend declaration","Its face value"],a:1,e:"Beta measures sensitivity of a security's returns to market movements."},
+{c:15,q:"An upward-sloping trendline connecting rising lows is commonly used to indicate:",o:["Uptrend support","Debt maturity","Dividend yield","Accounting profit"],a:0,e:"A rising trendline through higher lows can act as dynamic support in an uptrend."}
+];
+
+let questions=[], answers=[], marked=[], idx=0, remaining=7200, interval=null, lastResult=null;
+
+const ch=document.getElementById("chapter");
+chapters.forEach((x,i)=>ch.add(new Option((i+1)+". "+x,i)));
+
+function shuffle(a){return [...a].sort(()=>Math.random()-0.5)}
+function buildQuestions(mode){
+ let pool=bank;
+ if(mode==="chapter") pool=bank.filter(x=>x.c===Number(ch.value));
+ if(mode==="wrong") pool=bank.filter((_,i)=>JSON.parse(localStorage.getItem("raWrong")||"[]").includes(i));
+ if(mode==="full") return shuffle(pool).concat(shuffle(bank)).slice(0,100);
+ return shuffle(pool).slice(0,Math.min(20,pool.length));
+}
+function start(mode){
+ questions=buildQuestions(mode); if(!questions.length){alert("No saved wrong questions yet. Complete a test first.");return}
+ answers=new Array(questions.length).fill(null); marked=new Array(questions.length).fill(false); idx=0;
+ remaining=mode==="full"?7200:1800; document.getElementById("home").classList.add("hidden");document.getElementById("result").classList.add("hidden");document.getElementById("exam").classList.remove("hidden");
+ document.getElementById("modeTitle").textContent=mode==="full"?"Full NISM-Style Mock":mode==="chapter"?chapters[Number(ch.value)-1]:"Quick Practice";
+ clearInterval(interval); interval=setInterval(()=>{remaining--;drawTimer();if(remaining<=0)submitExam()},1000);render();
+}
+function drawTimer(){let h=Math.floor(remaining/3600),m=Math.floor(remaining%3600/60),s=remaining%60;document.getElementById("timer").textContent=[h,m,s].map(x=>String(x).padStart(2,"0")).join(":")}
+function render(){
+ const q=questions[idx];document.getElementById("qText").textContent=(idx+1)+". "+q.q;document.getElementById("caseText").textContent=q.case||"";
+ document.getElementById("qMeta").textContent=`Question ${idx+1} of ${questions.length} · Chapter ${q.c}`;
+ document.getElementById("bar").style.width=((idx+1)/questions.length*100)+"%";
+ document.getElementById("options").innerHTML=q.o.map((x,i)=>`<label><input type="radio" name="ans" value="${i}" ${answers[idx]===i?"checked":""} onchange="answers[idx]=${i};renderNav()">${String.fromCharCode(65+i)}. ${x}</label>`).join("");
+ renderNav();
+}
+function renderNav(){document.getElementById("navgrid").innerHTML=questions.map((q,i)=>`<button class="qnum ${i===idx?"active":""} ${answers[i]!=null?"answered":""} ${marked[i]?"review":""}" onclick="idx=${i};render()">${i+1}</button>`).join("")}
+function next(){if(idx<questions.length-1){idx++;render()}}
+function prev(){if(idx>0){idx--;render()}}
+function toggleReview(){marked[idx]=!marked[idx];renderNav()}
+function submitExam(){
+ if(!confirm("Submit this test?"))return;
+ clearInterval(interval);let correct=0,wrong=0,unattempted=0;
+ questions.forEach((q,i)=>{if(answers[i]==null)unattempted++;else if(answers[i]===q.a)correct++;else wrong++});
+ let score=correct-wrong*.25;lastResult={correct,wrong,unattempted,score};
+ let old=JSON.parse(localStorage.getItem("raWrong")||"[]");
+ questions.forEach((q,i)=>{let original=bank.indexOf(q);if(answers[i]!==null&&answers[i]!==q.a&&!old.includes(original))old.push(original)});
+ localStorage.setItem("raWrong",JSON.stringify(old));localStorage.setItem("raLast",JSON.stringify(lastResult));
+ document.getElementById("exam").classList.add("hidden");document.getElementById("result").classList.remove("hidden");
+ document.getElementById("score").textContent=score.toFixed(2)+"/"+questions.length;
+ document.getElementById("status").innerHTML=score>=questions.length*.6?'<b class="pass">PASS</b>':'<b class="fail">FAIL</b>';
+ document.getElementById("stats").textContent=`Correct: ${correct} · Wrong: ${wrong} · Not attempted: ${unattempted} · Negative marking: 0.25 per wrong answer`;
+ document.getElementById("review").innerHTML=questions.map((q,i)=>{
+ let ok=answers[i]===q.a;
+ return `<div class="review-item ${ok?'correct':''}"><b>Q${i+1}. ${q.q}</b><p>Your answer: ${answers[i]==null?"Not attempted":q.o[answers[i]]}</p><p><b>Correct answer: ${q.o[q.a]}</b></p><p>${q.e}</p></div>`
+ }).join("");
+}
+function wrongOnly(){start("wrong")}
+function retryWrongFromResult(){document.getElementById("result").classList.add("hidden");start("wrong")}
+function goHome(){document.getElementById("result").classList.add("hidden");document.getElementById("home").classList.remove("hidden")}
+drawTimer();
+</script>
+</body></html>
